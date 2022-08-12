@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta name="description" content="Morse Game" />
+  <meta charset="utf-8">
+  <title>Morse Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="Pedro Weinzettel LU9ABM" content="">
+  <style>
+    .container {
+      max-height: 50px;
+    }
+
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+    }
+
+    #deseado {
+      font-family: Monospace;
+      font-size: 5rem;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <button id="stop">STOP</button>
+    <button id="start">START</button>
+    <table>
+      <tr>
+        <td id = "deseado"></td>
+      </tr>
+      <tr>
+        <td id = "desc"></td>
+      </tr>
+      <tr>
+        <td id = "decoded"></td>
+      </tr>
+    </table>
+    <br>
+    <table>
+      <tr>
+        <th>Bien</th>
+        <td id = "bien">0</td>
+        <td id = "bienp">0%</td>
+      </tr>
+      <tr>
+        <th>Mal</th>
+        <td id = "mal">0</td>
+        <td id = "malp">0%</td>
+      </tr>
+      <tr>
+        <th>Total</th>
+        <td id = "total">0</td>
+        <td></td>
+      </tr>
+      <tr>
+        <th>Tiempo</th>
+        <td id = "tiempo">0</td>
+        <td></td>
+      </tr>
+    </table>
+
+    <div id="config">
+      <br>
+      <select id="ctiempo">
+        <option value="30">30s</option>
+        <option value="60" selected>60s</option>
+        <option value="120">120s</option>
+      </select>
+  
+      <br><input type="checkbox" id="letras" checked> <label for="letras">Letras</label>
+      <br><input type="checkbox" id="numeros" checked> <label for="numeros">Numeros</label>
+      <br><input type="checkbox" id="especiales"> <label for="especiales">Caracteres especiales</label>
+      <br><input type="checkbox" id="proc"> <label for="proc">Procedimientos</label>
+      <br><input type="checkbox" id="abbr"> <label for="abbr">Abreviaturas</label>
+      <br><input type="checkbox" id="qcode"> <label for="qcode">Q-Code</label>
+    </div>
+  </div>
+
+<script>
+  window.onload = function () {
+    var symbols = {
+      letras : ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
+      numeros : ["1","2","3","4","5","6","7","8","9","0"],
+      especiales : [".",",",":","?","'","-","/","(",")","\"","=","+","@"],
+      proc : ["AR","AS","HH","KN","SK"],
+      abbr : ["AGN","ANT","BK","CQ","DE","DX","FER","GA","GB","GE","GL","GM","GUD","HR","OM","OP","PSE","RIG","RPT","RST","RX","TX","TNX","TU","UR","WX","73"],
+      qcode : ["QRL","QRM","QRN","QRO","QRP","QRS","QRT","QRX","QSB","QSL","QSO","QSY","QTH"],
+      desc : {
+        // procedimientos
+        "AR": "Fin del mensaje",
+        "AS": "Espere",
+        "HH": "Erro",
+        "KN": "Invitando a una estacion",
+        "SK": "Fin del contacto",
+        // abreviaturas
+        "AGN" : "De nuevo",
+        "ANT" : "Antena",
+        "BK" : "Invitando al receptor a",
+        "CQ" : "Llamando estacion",
+        "DE" : "De",
+        "DX" : "Distancia",
+        "FER" : "Por",
+        "GA" : "Buenas tardes",
+        "GB" : "Adios",
+        "GE" : "Buenas noches",
+        "GL" : "Buena suerte",
+        "GM" : "Buenos dias",
+        "GUD" : "Bueno",
+        "HR" : "Aqui",
+        "OM" : "Amigo",
+        "OP" : "Operador",
+        "PSE" : "Por favor",
+        "RIG" : "Equipo de la estacion",
+        "RPT" : "Repetir",
+        "RST" : "Informe de señales",
+        "RX" : "Receptor",
+        "TX" : "Transmisor",
+        "TNX" : "Gracias",
+        "TU" : "Gracias",
+        "UR" : "Tu/Tuyo",
+        "WX" : "Clima",
+        "73" : "Saludos",
+        // q-code
+        "QRL" : "Frecuencia opcupada",
+        "QRM" : "Interferencia",
+        "QRN" : "Ruido estatico",
+        "QRO" : "Aumentar la potencia",
+        "QRP" : "Disminuir la potencia",
+        "QRS" : "Mas lento",
+        "QRT" : "Dejar de transmitir",
+        "QRX" : "Espera",
+        "QSB" : "Atenuacion de la señal",
+        "QSL" : "Confirmacion",
+        "QSO" : "Contacto",
+        "QSY" : "Cambio de frecuencia",
+        "QTH" : "Ubicacion",
+      }
+    };
+
+    var inimsg = "Presione una tecla para comenzar"
+
+    var deseado = document.getElementById("deseado");
+    var desc = document.getElementById("desc");
+    var decoded = document.getElementById("decoded");
+    var bien = document.getElementById("bien");
+    var mal = document.getElementById("mal");
+    var bienp = document.getElementById("bienp");
+    var malp = document.getElementById("malp");
+    var total = document.getElementById("total");
+    var tiempo = document.getElementById("tiempo");
+    var ctiempo = document.getElementById("ctiempo");
+    var startBtn = document.getElementById("start");
+    var stopBtn = document.getElementById("stop");
+    var config = document.getElementById("config");
+    var options = {};
+    var timer1;
+    var stopped = true;
+    var clear = true;
+    var list = [];
+
+    function get_symbol() {
+      let res = [];
+      if (document.getElementById("letras").checked) {res = res.concat(symbols.letras);}
+      if (document.getElementById("numeros").checked) res = res.concat(symbols.numeros);
+      if (document.getElementById("especiales").checked) res = res.concat(symbols.especiales);
+      if (document.getElementById("proc").checked) res = res.concat(symbols.proc);
+      if (document.getElementById("abbr").checked) res = res.concat(symbols.abbr);
+      if (document.getElementById("qcode").checked) res = res.concat(symbols.qcode);
+      return res;
+    };
+    function word_dice() {
+      if (list.length == 0) {
+        alert("Debe seleccionar al menos un grupo de caracteres")
+        stop();
+        return;
+      }
+
+      let rnd = Math.round(Math.random() * (list.length-1));
+      deseado.innerHTML = list[rnd];
+      if (symbols.desc[list[rnd]]) {
+        desc.innerHTML = symbols.desc[list[rnd]];
+      } else {
+        desc.innerHTML = "";
+      };
+    }
+    function correcto() {
+      deseado.style.color = 'green';
+      bien.innerHTML = parseInt(bien.innerHTML)+1;
+      calc_tot();
+      sonido_ok();
+    }
+    function incorrecto() {
+      deseado.style.color = 'red';
+      mal.innerHTML = parseInt(mal.innerHTML)+1;
+      calc_tot();
+      sonido_err();
+    }
+    function calc_tot() {
+      total.innerHTML = parseInt(bien.innerHTML)-parseInt(mal.innerHTML);  
+      bienp.innerHTML = Math.floor(parseInt(bien.innerHTML)/(parseInt(bien.innerHTML)+parseInt(mal.innerHTML))*100)+'%'; 
+      malp.innerHTML = Math.ceil(parseInt(mal.innerHTML)/(parseInt(bien.innerHTML)+parseInt(mal.innerHTML))*100)+'%';
+    }
+    function sonido_ok(type, x){
+      var context = new AudioContext()
+      var o = null
+      var g = null
+
+      o = context.createOscillator()
+      g = context.createGain()
+      o.connect(g)
+      g.connect(context.destination)
+
+      o.type = "sine"
+      o.frequency.value = 261;
+      o.start(0)
+      g.gain.exponentialRampToValueAtTime(
+        0.0001, context.currentTime + 1.5
+      )
+    }
+    function sonido_err(type, x){
+      var context = new AudioContext()
+      var o = null
+      var g = null
+
+      o = context.createOscillator()
+      g = context.createGain()
+      o.connect(g)
+      g.connect(context.destination)
+
+      o.type = "sawtooth"
+      o.frequency.value = 150;
+      o.start(0)
+      g.gain.exponentialRampToValueAtTime(
+        0.0001, context.currentTime + 1.5
+      )
+    }
+    function start() {
+      list = get_symbol();
+      tiempo.innerHTML = ctiempo.value;
+      stopped = false;
+      timer1 = setInterval(function(){
+        if (parseInt(tiempo.innerHTML) <= 0) {
+          stop();
+        } else {
+          tiempo.innerHTML = parseInt(tiempo.innerHTML)-1 
+        }
+      }, 1000);
+    }
+    function stop() {
+      config.style.display = "block";
+      stopped = true;
+      clearInterval(timer1);
+      decoded.innerHTML = '';
+      desc.innerHTML = '';
+      deseado.innerHTML = '';
+    }
+
+    function pre_start() {
+      desc.innerHTML = inimsg;
+      stopped = false;
+      config.style.display = "none";
+      lose_focus();
+    }
+    function lose_focus() {
+      let el = document.querySelector( ':focus' );
+      if( el ) el.blur();
+    }
+
+    startBtn.onclick = function(){if (stopped) pre_start()};
+    stopBtn.onclick = function(){stop()};
+
+    document.addEventListener("keypress", function onPress(event) {
+      if (stopped) {
+        if (event.key == "Enter") {
+          pre_start()
+        }
+        return;
+      }
+      if (deseado.innerHTML == "") {
+        start();
+        word_dice();
+        return;
+      }
+
+      if (clear) decoded.innerHTML = '';
+      clear = false;
+
+      if (decoded.innerHTML == '' && event.key == ' ') return;
+
+      decoded.innerHTML = decoded.innerHTML.concat(event.key.toUpperCase());
+
+      if (decoded.innerHTML.length >= deseado.innerHTML.length) {
+        if (deseado.innerHTML == decoded.innerHTML) {
+          correcto();
+          word_dice();
+        } else {
+          incorrecto();
+        }
+        clear = true;
+        setTimeout(function(){
+          deseado.style.color = 'black';
+        }, 500);
+      }
+    });
+  };
+
+</script>
+
+</body>
+</html>
