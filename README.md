@@ -1,4 +1,4 @@
 # morse_keyboard
 
-https://hamradio.solutions/vband/
+https://htmlpreview.github.io/?https://raw.githubusercontent.com/pweinzettel/morse_keyboard/dev/Game/game.html
 
