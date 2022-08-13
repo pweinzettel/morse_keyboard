@@ -294,8 +294,8 @@ desc : {
       let rnd = Math.floor(Math.random()*(max-min+1)+min)-date;
       //console.log("RND: "+rnd)
 
-      if (list[rnd].length > 4) {
-        let size = (100/(list[rnd].length*1.8));
+      if (list[rnd].length > 3) {
+        let size = (100/(list[rnd].length*2));
         deseado.style.fontSize = size+'vh';
       } else {
         deseado.style.fontSize = '';
