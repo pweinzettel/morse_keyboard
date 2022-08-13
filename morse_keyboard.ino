@@ -118,7 +118,7 @@ void clear_all() {
 void decode_char(){
   morse.decode();
   if (morse.decode_error) {
-    return;
+    //return;
   }
   for (int i = 0; i < sizeof(morse.decoded) / sizeof(morse.decoded[0]); i++) {
     if (morse.decoded[i] != 0x00) lcd_print(morse.decoded[i]);

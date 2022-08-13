@@ -38,7 +38,8 @@ class Morse {
     int symcnt;
     unsigned char morse[8];
 
-    const unsigned char CER = (char)255; // Char Error
+//    const unsigned char CER = (char)255; // Char Error
+    const unsigned char CER = '#'; // Char Error
 
     const unsigned char morse_tree[256] = {
       CER, 'E', 'T', 'I', 'A', 'N', 'M', 'S',  // 0 - 7
