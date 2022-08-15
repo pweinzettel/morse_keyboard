@@ -2,7 +2,7 @@
 
 Proyecto para usar un manipulador morse como teclado en una PC o celular, o usar solo con la pantalla LCD que se le puede conectar
 
-Incluye un pequeño entrenador web (un simple html que se puede usar online o descargar)
+Incluye un pequeño entrenador web <https://www.lu9abm.com/morse/game> La idea es ir agregandole funcionalidades
 
 Este proyecto se encuentra en desarrollo
 
