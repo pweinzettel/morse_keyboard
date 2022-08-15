@@ -36,6 +36,4 @@ const String welcome_2 = "LU9ABM";
 #define SPK_FREQ 580
 
 
-// notdef = default = WPM_DEF
-//#define WPM_READ A0
-#define WPM_DEF 20
+#define EEPROM_WPM 0

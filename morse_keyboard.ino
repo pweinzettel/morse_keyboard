@@ -8,6 +8,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Keyboard.h>
+#include <EEPROM.h>
 
 // Incluir archivo de configuracion
 #include "morse_keyboard.hpp"
@@ -22,7 +23,7 @@ LiquidCrystal_I2C lcd(LCD_ADDR,LCD_COL,LCD_ROW);
 bool iambic = true; // Al iniciar, detectar si el manipuador conectado es iambico o straight //TODO
 bool vband = false; // modo vband o modo teclado
 int spk_freq = SPK_FREQ; // freq a la que suena el parlante, pasar a config EEPROM //TODO
-int wpm = WPM_DEF; // word per minute, pasar a config EEPROM //TODO
+int wpm = 20; // word per minute, pasar a config EEPROM //TODO
 
 // Variables auxiliares
 int lcdrow = 0; // fila en la que estoy posicionado en el LCD
@@ -93,10 +94,7 @@ void read_opts() {
   spk_freq = map(analogRead(SPK_READ),0,1023,31,1200);
 #endif
 
-#ifdef WPM_READ
-  wpm = map(analogRead(WPM_READ),1,1030,5,50);
-#endif
-
+  wpm = EEPROM.read(EEPROM_WPM);
   morse.setWPM(wpm);
   print_wpm();
 }
@@ -211,32 +209,58 @@ void key_clear() {
   Keyboard.releaseAll();
 }
 
+void set_wpm() {
+  while (digitalRead(KEY_BACKSP) == LOW) {
+    if (digitalRead(KEY_INTRO) == LOW) {
+      if (KI) return;
+      wpm = wpm-5;
+      if (wpm <= 9) wpm=10;
+      morse.setWPM(wpm);
+      print_wpm();
+      KI = true;
+    } else { KI = false; }
+    if (digitalRead(KEY_SEND) == LOW) {
+      if (KS) return;
+      wpm = wpm+5;
+      if (wpm >= 100) wpm=100;
+      morse.setWPM(wpm);
+      print_wpm();
+      KS = true;
+    } else { KS = false; }
+    delay(10);
+  }
+  EEPROM.write(EEPROM_WPM, wpm);
+}
+
 void check_keys() {
 #ifdef KEY_SEND
   if (digitalRead(KEY_SEND) == LOW) {
-      if (KS) return;
-      key_send();
+    if (KS) return;
+    key_send();
     KS = true;
   } else { KS = false; }
 #endif
 #ifdef KEY_INTRO
   if (digitalRead(KEY_INTRO) == LOW) {
-      if (KI) return;
-      key_intro();
+    if (KI) return;
+    key_intro();
     KI = true;
   } else { KI = false; }
 #endif
 #ifdef KEY_BACKSP
   if (digitalRead(KEY_BACKSP) == LOW) {
-      if (KB) return;
-      key_backsp();
+    if (KB) {
+      set_wpm();
+      return;
+    }
+    key_backsp();
     KB = true;
   } else { KB = false; }
 #endif
 #ifdef KEY_CLEAR
   if (digitalRead(KEY_CLEAR) == LOW) {
-      if (KC) return;
-      key_clear();
+    if (KC) return;
+    key_clear();
     KC = true;
   } else { KC = false; }
 #endif
