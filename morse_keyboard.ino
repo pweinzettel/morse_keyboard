@@ -8,7 +8,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Keyboard.h>
-#include <Keyboard_es_ES.h>
 #include <EEPROM.h>
 
 // Incluir archivo de configuracion
@@ -45,6 +44,7 @@ void DAH_PIN_CHANGE() {
 void setup() {
   lcd.init();
   lcd.backlight();
+  lcd.createChar(1, enie);
 
   lcd.setCursor((LCD_COL/2)-(((welcome_1.length()*10)/2)+5)/10,0);
   lcd.print(welcome_1);
@@ -53,7 +53,18 @@ void setup() {
   lcd.setCursor(0,0);
   delay(1000);
 
-  Keyboard.begin(KeyboardLayout_es_ES);
+  Keyboard.begin(KeyboardLayout_custom);
+
+  if (false) {
+    for (int i=0; i <= 128; i++){
+      Keyboard.print(i);
+      Keyboard.print("> ");
+      Keyboard.write(i);
+      delay(100);
+      Keyboard.write(KEY_RETURN);
+    }
+    Keyboard.releaseAll();
+  }
 
   pinMode(DIT_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(DIT_PIN), DIT_PIN_CHANGE, FALLING);
@@ -119,12 +130,16 @@ void decode_char(){
   if (morse.decode_error) {
     //return;
   }
+
   for (int i = 0; i < sizeof(morse.decoded) / sizeof(morse.decoded[0]); i++) {
-    if (morse.decoded[i] != 0x00) lcd_print(morse.decoded[i]);
+    if (morse.decoded[i] != 0x0) lcd_print(morse.decoded[i]);
   }
 }
-
-void lcd_print(char prnt) {
+int lcd_prnt;
+int kbr_prnt;
+void lcd_print(short prnt) {
+  lcd_prnt = prnt;
+  kbr_prnt = prnt;
   if (lcdcol >= LCD_COL) {
     lcdcol = 0;
     lcdrow++;
@@ -139,10 +154,12 @@ void lcd_print(char prnt) {
     lcd.setCursor(lcdcol,lcdrow);
     lcdcol++;
   }
-  lcd.print(prnt);
-  if (!vband) Keyboard.print(prnt);
+  if (prnt == 145) lcd_prnt = 1;
+  lcd.write(lcd_prnt);
+  //lcd.print(int(prnt),DEC);
+  if (prnt == 145) kbr_prnt = 127; // Ñ
+  if (!vband) Keyboard.write(kbr_prnt);
 }
-
 void print_space() {
   lcd_print(' ');
 }
