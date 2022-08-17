@@ -10,7 +10,7 @@ class Morse {
   public:
   // Func
     Morse();
-    void push(unsigned char symbol);
+    void push(byte symbol);
     void decode();
     void setWPM(unsigned int wpm);
     void clear();
@@ -36,12 +36,12 @@ class Morse {
   // Vars
     int treeptr;
     int symcnt;
-    unsigned char morse[8];
+    byte morse[8];
 
-//    const unsigned char CER = (char)255; // Char Error
-    const unsigned char CER = '#'; // Char Error
+//    const byte CER = (char)255; // Char Error
+    const byte CER = '#'; // Char Error
 
-    const unsigned char morse_tree[256] = {
+    const byte morse_tree[256] = {
       CER, 'E', 'T', 'I', 'A', 'N', 'M', 'S',  // 0 - 7
       'U', 'R', 'W', 'D', 'K', 'G', 'O', 'H',  // 8 - 15
       'V', 'F', CER, 'L', 0x85,'P', 'J', 'B',  // 16 - 23

@@ -132,7 +132,7 @@ void decode_char(){
   }
 
   for (int i = 0; i < sizeof(morse.decoded) / sizeof(morse.decoded[0]); i++) {
-    if (morse.decoded[i] != 0x0) lcd_print(morse.decoded[i]);
+    if (morse.decoded[i] != 0x00) lcd_print(morse.decoded[i]);
   }
 }
 int lcd_prnt;
