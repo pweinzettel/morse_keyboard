@@ -16,7 +16,7 @@ class Morse {
     void clear();
 
   // Vars
-    unsigned char decoded[2];
+    unsigned short decoded[2];
     unsigned int unit;
     unsigned int dit_len;
     unsigned int dah_len;
@@ -51,11 +51,11 @@ class Morse {
       CER, '+' ,CER, CER, CER, CER, '1', '6',  // 40 - 47
 //    '=', '/', CER, CER, CER, 0x83,CER, '7',  // 48 - 55
       '=', '/', CER, CER, CER, '(', CER, '7',  // 48 - 55
-      CER, CER, CER, '8', CER, '9', '0', CER,  // 56 - 63
+      CER, CER, 'Ñ', '8', CER, '9', '0', CER,  // 56 - 63
       CER, CER, CER, CER, 0x84,CER, CER, CER,  // 64 - 71
       CER, CER, CER, '?', '_', CER, CER, CER,  // 72 - 79
       CER, '"', CER, CER, '.', CER, CER, CER,  // 80 - 87
-      CER, '@', CER, CER, CER, CER, CER, CER,  // 88 - 95
+      CER, '@', CER, CER, CER, '\'',CER, CER,  // 88 - 95
       '-', CER, CER, CER, CER, CER, CER, CER,  // 96 - 103
       CER, ';', '!', CER, ')', CER, CER, CER,  // 104 - 111
       CER, CER, ',', CER, CER, CER, CER, ':',  // 112 - 119
@@ -77,7 +77,6 @@ class Morse {
       CER, CER, CER, CER, CER, CER, CER, CER,  // 241 - 248
       CER, CER, CER, CER, CER, CER, CER, 0x82  // 249 - 256
     };
-
 };
 
 #endif
