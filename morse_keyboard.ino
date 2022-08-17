@@ -20,8 +20,6 @@ Morse morse;
 LiquidCrystal_I2C lcd(LCD_ADDR,LCD_COL,LCD_ROW);
 
 // Variables que deberian tomarse desde la eeprom <-> config
-bool iambic = true; // Al iniciar, detectar si el manipuador conectado es iambico o straight //TODO
-bool vband = false; // modo vband o modo teclado
 int spk_freq = SPK_FREQ; // freq a la que suena el parlante, pasar a config EEPROM //TODO
 int wpm = 20; // word per minute, pasar a config EEPROM //TODO
 
@@ -73,40 +71,21 @@ void setup() {
 
   lcd.clear();
 
-#ifdef SPK_READ
-  pinMode(SPK_READ, INPUT_PULLUP);
-#endif
-#ifdef WPM_DEF
-  pinMode(WPM_DEF, INPUT_PULLUP);
-#endif
-
   pinMode(SPK_OUT, OUTPUT);
   pinMode(PULSE_LED, OUTPUT);
   pinMode(CHAR_LED, OUTPUT);
   pinMode(WORD_LED, OUTPUT);
 
-#ifdef KEY_SEND
   pinMode(KEY_SEND, INPUT_PULLUP);
-#endif
-#ifdef KEY_INTRO
   pinMode(KEY_INTRO, INPUT_PULLUP);
-#endif
-#ifdef KEY_BACKSP
   pinMode(KEY_BACKSP, INPUT_PULLUP);
-#endif
-#ifdef KEY_CLEAR
   pinMode(KEY_CLEAR, INPUT_PULLUP);
-#endif
 
   read_opts();
 }
 
 void read_opts() {
-#ifdef SPK_READ
-  spk_freq = map(analogRead(SPK_READ),0,1023,31,1200);
-#endif
-
-  wpm = EEPROM.read(EEPROM_WPM);
+  wpm = EEPROM.read(0);
   morse.setWPM(wpm);
   print_wpm();
 }
@@ -127,19 +106,26 @@ void clear_all() {
 
 void decode_char(){
   morse.decode();
-  if (morse.decode_error) {
-    //return;
-  }
-
   for (int i = 0; i < sizeof(morse.decoded) / sizeof(morse.decoded[0]); i++) {
     if (morse.decoded[i] != 0x00) lcd_print(morse.decoded[i]);
   }
 }
-int lcd_prnt;
-int kbr_prnt;
+
 void lcd_print(short prnt) {
-  lcd_prnt = prnt;
-  kbr_prnt = prnt;
+  int lcd_prnt;
+  int kbr_prnt;
+  switch (prnt) {
+    case 145:
+      lcd_prnt = 1; // Ñ
+      kbr_prnt = 127; // Ñ
+    break;
+
+    default:
+      lcd_prnt = prnt;
+      kbr_prnt = prnt;
+    break;
+  }
+
   if (lcdcol >= LCD_COL) {
     lcdcol = 0;
     lcdrow++;
@@ -154,14 +140,9 @@ void lcd_print(short prnt) {
     lcd.setCursor(lcdcol,lcdrow);
     lcdcol++;
   }
-  if (prnt == 145) lcd_prnt = 1;
-  lcd.write(lcd_prnt);
   //lcd.print(int(prnt),DEC);
-  if (prnt == 145) kbr_prnt = 127; // Ñ
-  if (!vband) Keyboard.write(kbr_prnt);
-}
-void print_space() {
-  lcd_print(' ');
+  lcd.write(lcd_prnt);
+  Keyboard.write(kbr_prnt);
 }
 
 void key_press() {
@@ -172,31 +153,22 @@ void key_press() {
 
 void dit(){
   key_press(); // todo lo que necesito hacer cada vez que se inicia un key press
-
   tone(SPK_OUT, spk_freq); // iniciar tono
   digitalWrite(PULSE_LED,HIGH); // iniciar pulso
-  if (vband) Keyboard.press(KEY_LEFT_CTRL); // simular por teclaro la presion de ctrl izquierdo
   delay(morse.dit_len); // esperar el tiempo del punto
-  if (vband) Keyboard.releaseAll(); // soltar todas las teclas
   noTone(SPK_OUT); // frenat tono
   digitalWrite(PULSE_LED,LOW); // frenar pulso
-
   delay(morse.intra_char); // separacion intra char
-
   morse.push(DIT);
 }
 
 void dah(){
   key_press(); // todo lo que necesito hacer cada vez que se inicia un key press
-
   tone(SPK_OUT, spk_freq); // iniciar tono
   digitalWrite(PULSE_LED,HIGH); // iniciar pulso
-  if (vband) Keyboard.press(KEY_RIGHT_CTRL); // simular por teclaro la presion de ctrl derecho
   delay(morse.dah_len); // esperar el tiempo de raya
-  if (vband) Keyboard.releaseAll(); // soltar todas las teclas
   noTone(SPK_OUT); // frenar tono
   digitalWrite(PULSE_LED,LOW); // frenar pulso
-
   delay(morse.intra_char); // separacion intra char
   morse.push(DAH);
 }
@@ -247,25 +219,16 @@ void set_wpm() {
     } else { KS = false; }
     delay(10);
   }
-  EEPROM.write(EEPROM_WPM, wpm);
+  EEPROM.write(0, wpm);
 }
 
 void check_keys() {
-#ifdef KEY_SEND
-  if (digitalRead(KEY_SEND) == LOW) {
-    if (KS) return;
-    key_send();
-    KS = true;
-  } else { KS = false; }
-#endif
-#ifdef KEY_INTRO
-  if (digitalRead(KEY_INTRO) == LOW) {
-    if (KI) return;
-    key_intro();
-    KI = true;
-  } else { KI = false; }
-#endif
-#ifdef KEY_BACKSP
+  if (digitalRead(KEY_CLEAR) == LOW) {
+    if (KC) return;
+    key_clear();
+    KC = true;
+  } else { KC = false; }
+
   if (digitalRead(KEY_BACKSP) == LOW) {
     if (KB) {
       set_wpm();
@@ -274,18 +237,21 @@ void check_keys() {
     key_backsp();
     KB = true;
   } else { KB = false; }
-#endif
-#ifdef KEY_CLEAR
-  if (digitalRead(KEY_CLEAR) == LOW) {
-    if (KC) return;
-    key_clear();
-    KC = true;
-  } else { KC = false; }
-#endif
+
+  if (digitalRead(KEY_INTRO) == LOW) {
+    if (KI) return;
+    key_intro();
+    KI = true;
+  } else { KI = false; }
+
+  if (digitalRead(KEY_SEND) == LOW) {
+    if (KS) return;
+    key_send();
+    KS = true;
+  } else { KS = false; }
 }
 
 void loop() {
-  //read_opts();
   if (digitalRead(DIT_PIN) == LOW || morse.dit_pressed == true) dit(); // si presiono un dit o lo presione previamente (guardado por interrupt), ir a funcion de dit o dah respectivamente
   if (digitalRead(DAH_PIN) == LOW || morse.dah_pressed == true) dah();
 
@@ -298,8 +264,7 @@ void loop() {
   }
   if (millis()-morse.last_key > morse.wrd_sep) {
     digitalWrite(WORD_LED,HIGH);
-    if (!morse.wready && !morse.decode_error) print_space();
+    if (!morse.wready && !morse.decode_error) lcd_print(' ');
     morse.wready = true;
   }
-  delay(1);
 }
