@@ -4,6 +4,16 @@
 const String welcome_1 = "MORSE";
 const String welcome_2 = "LU9ABM";
 
+// Pines donde se conectara el manipulador (deben ser interrupt)
+#define DIT_PIN 1
+#define DAH_PIN 0
+
+// Que tecla va a que pin de la placa
+#define KEY_CLEAR 4
+#define KEY_BACKSP 14
+#define KEY_INTRO 15
+#define KEY_SEND 16
+
 // LCD a utilizar, especificar address del modulo serie/paralelo i2c y tamaño del mismo
 #define LCD_ADDR 0x27
 #define LCD_COL 16
@@ -14,29 +24,13 @@ const String welcome_2 = "LU9ABM";
 #define WORD_LED 8
 #define PULSE_LED 9
 
-// Que tecla va a que pin de la placa
-#define KEY_CLEAR 4
-#define KEY_BACKSP 14
-#define KEY_INTRO 15
-#define KEY_SEND 16
-
-// Anti-rebote de teclas en ms //TODO
-#define DEBOUNCE_DEALY 500
-#define DEBOUNCE_EVERY 100
-
-// Pines donde se conectara el manipulador (deben ser interrupt)
-#define DIT_PIN 1
-#define DAH_PIN 0
-
 // Salida de audio
 #define SPK_OUT 10
 
-// notdef = default = SPK_FREQREQ
-//#define SPK_READ A1
+// SPK_FREQREQ
 #define SPK_FREQ 580
 
-#define EEPROM_WPM 0
-
+// Teclado
 #define SHIFT 0x80
 #define ALT_GR 0xc0
 #define ISO_KEY 0x64
