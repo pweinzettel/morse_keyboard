@@ -8,6 +8,7 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Keyboard.h>
+#include <Keyboard_es_ES.h>
 #include <EEPROM.h>
 
 // Incluir archivo de configuracion
@@ -52,7 +53,7 @@ void setup() {
   lcd.setCursor(0,0);
   delay(1000);
 
-  Keyboard.begin();
+  Keyboard.begin(KeyboardLayout_es_ES);
 
   pinMode(DIT_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(DIT_PIN), DIT_PIN_CHANGE, FALLING);

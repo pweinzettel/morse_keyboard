@@ -35,5 +35,4 @@ const String welcome_2 = "LU9ABM";
 //#define SPK_READ A1
 #define SPK_FREQ 580
 
-
 #define EEPROM_WPM 0
