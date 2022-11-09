@@ -3,6 +3,10 @@
 
 #define DIT '.'
 #define DAH '-'
+#define STACK 20
+
+#define IAMBIC 0
+#define STRAIGHT 1
 
 #include <Arduino.h>
 
@@ -10,33 +14,52 @@ class Morse {
   public:
   // Func
     Morse();
-    void push(byte symbol);
-    void decode();
-    void setWPM(unsigned int wpm);
+    void setKeyMode(byte *key_mode);
+    void push(byte);
+    void decode(byte *decoded);
+    void setWPM(unsigned int);
     void clear();
+    void straight_start();
+    void straight_stop();
+    void unit_len();
+    unsigned int getWPM();
 
   // Vars
-    unsigned short decoded[2];
-    unsigned int unit;
-    unsigned int dit_len;
-    unsigned int dah_len;
-    unsigned int intra_char;
-    unsigned int inter_char;
-    unsigned int wrd_sep;
-    unsigned long last_key;
+    unsigned int wpm = 0;
+    unsigned int unit = 0;
+    unsigned int dit_len = 0;
+    unsigned int dah_len = 0;
+    unsigned int intra_char = 0;
+    unsigned int inter_char = 0;
+    unsigned int wrd_sep = 0;
+    volatile unsigned long last_key = 0;
     bool cready;
     bool wready;
     bool decode_error;
     volatile bool dit_pressed;
     volatile bool dah_pressed;
+    volatile bool straight_pressed;
+    byte key_mode;
 
   private:
   // Func
+    void straight_push(int *t);
+    void straight_s_push(int *t);
 
   // Vars
     int treeptr;
     int symcnt;
     byte morse[8];
+    volatile unsigned long straight_ini = 0;
+    volatile unsigned long straight_s_ini = 0;
+
+    volatile unsigned int straight_pulse[STACK];
+    volatile byte straight_p_indx = 0;
+    volatile byte straight_pd_indx = 0;
+
+    volatile unsigned int straight_space[STACK] = {'0'};
+    volatile byte straight_s_indx = 1;
+    volatile byte straight_sd_indx = 0;
 
 //    const byte CER = (char)255; // Char Error
     const byte CER = '#'; // Char Error

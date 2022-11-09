@@ -1,7 +1,7 @@
 // Configuraciones
 
 // Mensaje de bienvenida
-const String welcome_1 = "MORSE";
+const String welcome_1 = "Morse Keyboard";
 const String welcome_2 = "LU9ABM";
 
 // Pines donde se conectara el manipulador (deben ser interrupt)
@@ -36,7 +36,7 @@ const String welcome_2 = "LU9ABM";
 #define ISO_KEY 0x64
 #define ISO_REPLACEMENT 0x32
 
-const byte enie[8] = {
+const byte enie[] = {
  B01101,
  B10010,
  B00000,
@@ -47,7 +47,7 @@ const byte enie[8] = {
  B10001
 };
 
-extern const uint8_t KeyboardLayout_custom[129] PROGMEM =
+extern const uint8_t KeyboardLayout_custom[] PROGMEM =
 {
 	0x00,          // NUL
 	0x00,          // SOH
